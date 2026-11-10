@@ -1,20 +1,35 @@
-name: kernel
+name: boot
 on:
   workflow_dispatch:
   push:
-    paths:
-      - 'kernel/**'
-      - 'tools/build-kernel.sh'
+    branches: [main]
 jobs:
-  build:
+  boot:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Install build dependencies
-        run: sudo apt-get update && sudo apt-get install -y build-essential bc flex bison libelf-dev libssl-dev
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential bc flex bison libelf-dev libssl-dev clang lld cpio qemu-system-x86
       - name: Build kernel
         run: ./tools/build-kernel.sh
+      - name: Build init and initramfs
+        run: ./tools/pack-initramfs.sh
+      - name: Boot in QEMU
+        run: |
+          timeout 90 qemu-system-x86_64 \
+            -kernel out/bzImage \
+            -initrd out/initramfs.cpio.gz \
+            -append "console=ttyS0 panic=-1" \
+            -m 128M -nographic -no-reboot > out/boot.log 2>&1 || true
+          cat out/boot.log
+          grep -q "Abandon all hope" out/boot.log
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
-          name: bzImage
-          path: out/bzImage
+          name: iscariot
+          path: |
+            out/bzImage
+            out/initramfs.cpio.gz
+            out/boot.log
