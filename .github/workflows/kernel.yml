@@ -11,7 +11,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential bc flex bison libelf-dev libssl-dev clang lld cpio qemu-system-x86
+          sudo apt-get install -y build-essential gcc-14 bc flex bison libelf-dev libssl-dev clang lld cpio qemu-system-x86
       - name: Build kernel
         run: ./tools/build-kernel.sh
       - name: Build init and initramfs
