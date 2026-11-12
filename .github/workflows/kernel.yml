@@ -14,15 +14,18 @@ jobs:
           sudo apt-get install -y build-essential gcc-14 bc flex bison libelf-dev libssl-dev clang lld cpio qemu-system-x86
       - name: Build kernel
         run: ./tools/build-kernel.sh
+      - name: Show kernel config
+        run: grep -E 'CONFIG_(64BIT|PRINTK|TTY|SERIAL_8250|SERIAL_8250_CONSOLE|BLK_DEV_INITRD|RD_GZIP|BINFMT_ELF|DEVTMPFS|EARLY_PRINTK)[= ]' out/kernel-build/linux-*/.config || true
       - name: Build init and initramfs
         run: ./tools/pack-initramfs.sh
       - name: Boot in QEMU
         run: |
-          timeout 90 qemu-system-x86_64 \
+          timeout 60 qemu-system-x86_64 \
+            -cpu max \
             -kernel out/bzImage \
             -initrd out/initramfs.cpio.gz \
-            -append "console=ttyS0 panic=-1" \
-            -m 128M -nographic -no-reboot > out/boot.log 2>&1 || true
+            -append "console=ttyS0 earlyprintk=serial,ttyS0 loglevel=8" \
+            -m 256M -nographic > out/boot.log 2>&1 || true
           cat out/boot.log
           grep -q "Abandon all hope" out/boot.log
       - uses: actions/upload-artifact@v4
