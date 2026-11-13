@@ -15,7 +15,7 @@ jobs:
       - name: Build kernel
         run: ./tools/build-kernel.sh
       - name: Show kernel config
-        run: grep -E 'CONFIG_(64BIT|PRINTK|TTY|SERIAL_8250|SERIAL_8250_CONSOLE|BLK_DEV_INITRD|RD_GZIP|BINFMT_ELF|DEVTMPFS|EARLY_PRINTK)[= ]' out/kernel-build/linux-*/.config || true
+        run: ./tools/check-config.sh
       - name: Build init and initramfs
         run: ./tools/pack-initramfs.sh
       - name: Boot in QEMU
