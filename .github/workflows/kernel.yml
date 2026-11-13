@@ -27,7 +27,7 @@ jobs:
             -append "console=ttyS0 earlyprintk=serial,ttyS0 loglevel=8" \
             -m 256M -nographic > out/boot.log 2>&1 || true
           cat out/boot.log
-          grep -q "Abandon all hope" out/boot.log
+          grep -q "Abandon all hope" out/boot.log && grep -q "iscariot# " out/boot.log
       - uses: actions/upload-artifact@v4
         if: always()
         with:
